@@ -1,0 +1,7 @@
+/build/
+/out/
+/.qt/
+/.qtcreator/
+CMakeLists.txt.user
+*.user
+.DS_Store
