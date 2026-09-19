@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "SerialCommands.h"
 #include "ui_MainWindow.h"
 
 #include <QAbstractItemView>
@@ -9,7 +10,10 @@
 #include <QListView>
 #include <QPalette>
 #include <QPushButton>
+#include <QResizeEvent>
 #include <QStyle>
+#include <QTextCursor>
+#include <QtGlobal>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -37,6 +41,18 @@ MainWindow::MainWindow(QWidget *parent)
             this, &MainWindow::updateConnectButton);
     connect(ui->connectButton, &QPushButton::clicked,
             this, &MainWindow::onConnectButtonClicked);
+    connect(ui->startButton, &QPushButton::clicked,
+            this, &MainWindow::onStartButtonClicked);
+    connect(ui->stopButton, &QPushButton::clicked,
+            this, &MainWindow::onStopButtonClicked);
+    connect(ui->errorToastCloseButton, &QPushButton::clicked,
+            this, &MainWindow::hideErrorToast);
+    connect(serialService, &SerialService::dataReceived,
+            this, &MainWindow::onSerialDataReceived);
+    connect(serialService, &SerialService::errorOccurred,
+            this, &MainWindow::onSerialError);
+    ui->errorToast->hide();
+    ui->errorToast->raise();
 
     portRefreshTimer->setInterval(5000);
     connect(portRefreshTimer, &QTimer::timeout, this, [this]() {
@@ -47,6 +63,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     setCurrentPage(0);
     refreshDetectedPorts();
+    updateTestButtons();
     portRefreshTimer->start();
 }
 
@@ -69,6 +86,33 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
     }
 
     return QMainWindow::eventFilter(watched, event);
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    QMainWindow::resizeEvent(event);
+    positionErrorToast();
+}
+
+void MainWindow::showError(const QString &message)
+{
+    ui->errorToastLabel->setText(message);
+    ui->errorToast->adjustSize();
+    ui->errorToast->show();
+    ui->errorToast->raise();
+    positionErrorToast();
+}
+
+void MainWindow::hideErrorToast()
+{
+    ui->errorToast->hide();
+}
+
+void MainWindow::positionErrorToast()
+{
+    constexpr int margin = 16;
+    const int x = ui->centralWidget->width() - ui->errorToast->width() - margin;
+    ui->errorToast->move(qMax(margin, x), margin);
 }
 
 void MainWindow::setCurrentPage(int pageIndex)
@@ -149,6 +193,18 @@ void MainWindow::updateConnectButton()
     ui->connectButton->setProperty("connected", connected);
     ui->connectButton->style()->unpolish(ui->connectButton);
     ui->connectButton->style()->polish(ui->connectButton);
+
+    if (!connected) {
+        m_testRunning = false;
+    }
+    updateTestButtons();
+}
+
+void MainWindow::updateTestButtons()
+{
+    const bool connected = serialService->isConnected();
+    ui->startButton->setEnabled(connected && !m_testRunning);
+    ui->stopButton->setEnabled(connected && m_testRunning);
 }
 
 void MainWindow::onConnectButtonClicked()
@@ -164,6 +220,46 @@ void MainWindow::onConnectButtonClicked()
         return;
     }
 
-    serialService->connectTo(portName);
+    if (!serialService->connectTo(portName)) {
+        showError(serialService->lastErrorString());
+    }
     updateConnectButton();
+}
+
+void MainWindow::onStartButtonClicked()
+{
+    if (!serialService->isConnected()) {
+        showError(QStringLiteral("Connect to a serial port before starting a test."));
+        return;
+    }
+
+    const QByteArray payload = QByteArray::number(RUN_TEST) + '\n';
+    if (!serialService->send(payload)) {
+        showError(serialService->lastErrorString());
+        return;
+    }
+
+    m_testRunning = true;
+    updateTestButtons();
+}
+
+void MainWindow::onStopButtonClicked()
+{
+    m_testRunning = false;
+    updateTestButtons();
+}
+
+void MainWindow::onSerialDataReceived(const QByteArray &payload)
+{
+    ui->testOutput->moveCursor(QTextCursor::End);
+    ui->testOutput->insertPlainText(QString::fromUtf8(payload));
+    ui->testOutput->moveCursor(QTextCursor::End);
+}
+
+void MainWindow::onSerialError(const QString &message)
+{
+    showError(message);
+    m_testRunning = false;
+    updateConnectButton();
+    updateTestButtons();
 }

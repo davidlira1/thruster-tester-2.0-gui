@@ -22,6 +22,7 @@ qt_add_executable(appThrusterTester
     src/MainWindow.ui
     src/SerialService.cpp
     src/SerialService.h
+    src/SerialCommands.h
     src/SerialPortFilter.cpp
     src/SerialPortFilter.h
     resources/resources.qrc

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QByteArray>
 #include <QObject>
 #include <QSerialPort>
 #include <QString>
@@ -21,10 +22,22 @@ public:
     bool connectTo(const QString &portName);
     void disconnectPort();
     bool isConnected() const;
+    bool send(const QByteArray &payload);
+    QString lastErrorString() const;
+
+signals:
+    void dataReceived(const QByteArray &payload);
+    void errorOccurred(const QString &message);
 
 private:
+    void onReadyRead();
+    void onSerialErrorOccurred(QSerialPort::SerialPortError error);
+
     static constexpr int DefaultBaudRate = 115200;
 
     QSerialPort serialPort;
     int m_baudRate = DefaultBaudRate;
+    QString m_lastErrorString;
+    bool m_closing = false;
+    bool m_opening = false;
 };

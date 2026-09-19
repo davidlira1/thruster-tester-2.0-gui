@@ -191,6 +191,42 @@ QPushButton#stopButton:hover {
     background-color: #93303d;
 }
 
+QPushButton#startButton:disabled,
+QPushButton#stopButton:disabled {
+    background-color: #24313c;
+    color: #8aa0b0;
+}
+
+QFrame#errorToast {
+    background-color: #2a1f24;
+    border: 1px solid #7f2934;
+    border-radius: 8px;
+}
+
+QLabel#errorToastLabel {
+    color: #d7e4ee;
+    font-size: 13px;
+}
+
+QPushButton#errorToastCloseButton {
+    min-height: 24px;
+    max-height: 24px;
+    min-width: 24px;
+    max-width: 24px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: #8aa0b0;
+    font-weight: 600;
+    padding: 0;
+    text-align: center;
+}
+
+QPushButton#errorToastCloseButton:hover {
+    background-color: #3a2a30;
+    color: #d7e4ee;
+}
+
 QScrollArea#sidebarScrollArea,
 QScrollArea#contentScrollArea {
     background: transparent;
@@ -209,7 +245,13 @@ QWidget#developerPage {
     border: none;
 }
 
-QLabel#testPlaceholderLabel,
+QPlainTextEdit#testOutput {
+    background-color: #18242e;
+    color: #d7e4ee;
+    border: none;
+    font-size: 14px;
+}
+
 QLabel#calibrationPlaceholderLabel,
 QLabel#developerPlaceholderLabel {
     color: #8aa0b0;
@@ -663,6 +705,9 @@ QScrollBar::sub-page:vertical {
               </item>
               <item>
                <widget class="QPushButton" name="startButton">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>▶  Start Test</string>
                 </property>
@@ -670,6 +715,9 @@ QScrollBar::sub-page:vertical {
               </item>
               <item>
                <widget class="QPushButton" name="stopButton">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>■  Stop Test</string>
                 </property>
@@ -834,12 +882,15 @@ QScrollBar::sub-page:vertical {
              <widget class="QWidget" name="testPage">
               <layout class="QVBoxLayout" name="testPageLayout">
                <item>
-                <widget class="QLabel" name="testPlaceholderLabel">
-                 <property name="text">
-                  <string>Test under construction</string>
+                <widget class="QPlainTextEdit" name="testOutput">
+                 <property name="readOnly">
+                  <bool>true</bool>
                  </property>
-                 <property name="alignment">
-                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 <property name="frameShape">
+                  <enum>QFrame::Shape::NoFrame</enum>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Firmware replies will appear here</string>
                  </property>
                 </widget>
                </item>
@@ -905,6 +956,50 @@ QScrollBar::sub-page:vertical {
      </widget>
     </item>
    </layout>
+   <widget class="QFrame" name="errorToast">
+    <property name="geometry">
+     <rect>
+      <x>860</x>
+      <y>16</y>
+      <width>320</width>
+      <height>48</height>
+     </rect>
+    </property>
+    <property name="visible">
+     <bool>false</bool>
+    </property>
+    <layout class="QHBoxLayout" name="errorToastLayout">
+     <property name="leftMargin">
+      <number>12</number>
+     </property>
+     <property name="topMargin">
+      <number>8</number>
+     </property>
+     <property name="rightMargin">
+      <number>8</number>
+     </property>
+     <property name="bottomMargin">
+      <number>8</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="errorToastLabel">
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string></string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="errorToastCloseButton">
+       <property name="text">
+        <string>x</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
   </widget>
  </widget>
  <resources>
