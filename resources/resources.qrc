@@ -1,6 +1,0 @@
-<RCC>
-    <qresource prefix="/icons">
-        <file alias="line-graph.svg">icons/line-graph.svg</file>
-        <file alias="status-dot.svg">icons/status-dot.svg</file>
-    </qresource>
-</RCC>
