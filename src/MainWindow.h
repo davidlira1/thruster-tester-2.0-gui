@@ -1,6 +1,10 @@
 #pragma once
 
+#include "SerialService.h"
+
 #include <QMainWindow>
+#include <QTimer>
+#include <QVector>
 
 class QButtonGroup;
 
@@ -18,9 +22,19 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
+
 private:
     void setCurrentPage(int pageIndex);
+    void applySidebarForTab(int pageIndex);
+    void refreshDetectedPorts();
+    void refreshPortCombo(const QVector<SerialService::Port> &ports);
+    void updateConnectButton();
+    void onConnectButtonClicked();
 
     Ui::MainWindow *ui;
     QButtonGroup *tabButtonGroup;
+    SerialService *serialService;
+    QTimer *portRefreshTimer;
 };
