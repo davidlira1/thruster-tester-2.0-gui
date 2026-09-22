@@ -245,13 +245,6 @@ QWidget#developerPage {
     border: none;
 }
 
-QPlainTextEdit#testOutput {
-    background-color: #18242e;
-    color: #d7e4ee;
-    border: none;
-    font-size: 14px;
-}
-
 QLabel#calibrationPlaceholderLabel,
 QLabel#developerPlaceholderLabel {
     color: #8aa0b0;
@@ -882,17 +875,7 @@ QScrollBar::sub-page:vertical {
              <widget class="QWidget" name="testPage">
               <layout class="QVBoxLayout" name="testPageLayout">
                <item>
-                <widget class="QPlainTextEdit" name="testOutput">
-                 <property name="readOnly">
-                  <bool>true</bool>
-                 </property>
-                 <property name="frameShape">
-                  <enum>QFrame::Shape::NoFrame</enum>
-                 </property>
-                 <property name="placeholderText">
-                  <string>Firmware replies will appear here</string>
-                 </property>
-                </widget>
+                <widget class="LineChart" name="testChart" native="true"/>
                </item>
               </layout>
              </widget>
@@ -1002,6 +985,14 @@ QScrollBar::sub-page:vertical {
    </widget>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LineChart</class>
+   <extends>QWidget</extends>
+   <header>LineChart.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../resources/resources.qrc"/>
  </resources>

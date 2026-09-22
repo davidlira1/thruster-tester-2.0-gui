@@ -38,7 +38,6 @@ private:
     void onConnectButtonClicked();
     void onStartButtonClicked();
     void onStopButtonClicked();
-    void onSerialDataReceived(const QByteArray &payload);
     void onSerialError(const QString &message);
     void hideErrorToast();
     void positionErrorToast();

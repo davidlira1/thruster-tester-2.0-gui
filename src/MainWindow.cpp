@@ -12,7 +12,6 @@
 #include <QPushButton>
 #include <QResizeEvent>
 #include <QStyle>
-#include <QTextCursor>
 #include <QtGlobal>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -47,8 +46,6 @@ MainWindow::MainWindow(QWidget *parent)
             this, &MainWindow::onStopButtonClicked);
     connect(ui->errorToastCloseButton, &QPushButton::clicked,
             this, &MainWindow::hideErrorToast);
-    connect(serialService, &SerialService::dataReceived,
-            this, &MainWindow::onSerialDataReceived);
     connect(serialService, &SerialService::errorOccurred,
             this, &MainWindow::onSerialError);
     ui->errorToast->hide();
@@ -247,13 +244,6 @@ void MainWindow::onStopButtonClicked()
 {
     m_testRunning = false;
     updateTestButtons();
-}
-
-void MainWindow::onSerialDataReceived(const QByteArray &payload)
-{
-    ui->testOutput->moveCursor(QTextCursor::End);
-    ui->testOutput->insertPlainText(QString::fromUtf8(payload));
-    ui->testOutput->moveCursor(QTextCursor::End);
 }
 
 void MainWindow::onSerialError(const QString &message)
