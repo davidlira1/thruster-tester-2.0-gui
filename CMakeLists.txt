@@ -27,6 +27,8 @@ qt_add_executable(appThrusterTester
     src/SerialPortFilter.h
     src/LineChart.cpp
     src/LineChart.h
+    src/TestSample.cpp
+    src/TestSample.h
     resources/resources.qrc
 )
 

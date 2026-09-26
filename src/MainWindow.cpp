@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "SerialCommands.h"
+#include "TestSample.h"
 #include "ui_MainWindow.h"
 
 #include <QAbstractItemView>
@@ -46,6 +47,8 @@ MainWindow::MainWindow(QWidget *parent)
             this, &MainWindow::onStopButtonClicked);
     connect(ui->errorToastCloseButton, &QPushButton::clicked,
             this, &MainWindow::hideErrorToast);
+    connect(serialService, &SerialService::dataReceived,
+            this, &MainWindow::onSerialDataReceived);
     connect(serialService, &SerialService::errorOccurred,
             this, &MainWindow::onSerialError);
     ui->errorToast->hide();
@@ -230,14 +233,46 @@ void MainWindow::onStartButtonClicked()
         return;
     }
 
+    m_rxBuffer.clear();
+    ui->testChart->clear();
+    ui->testChart->setAxisTitles(QStringLiteral("Watts"), QStringLiteral("Force"));
+    m_testRunning = true;
+
     const QByteArray payload = QByteArray::number(RUN_TEST) + '\n';
     if (!serialService->send(payload)) {
+        m_testRunning = false;
         showError(serialService->lastErrorString());
+        updateTestButtons();
         return;
     }
 
-    m_testRunning = true;
     updateTestButtons();
+}
+
+void MainWindow::onSerialDataReceived(const QByteArray &payload)
+{
+    if (!m_testRunning) {
+        m_rxBuffer.clear();
+        return;
+    }
+
+    m_rxBuffer.append(payload);
+    while (true) {
+        const int newline = m_rxBuffer.indexOf('\n');
+        if (newline < 0) {
+            break;
+        }
+
+        const QString line = QString::fromUtf8(m_rxBuffer.left(newline));
+        m_rxBuffer.remove(0, newline + 1);
+
+        const std::optional<TestSample> sample = parseTestSample(line);
+        if (!sample.has_value()) {
+            continue;
+        }
+
+        ui->testChart->addPoint(sample->watts, sample->force, QString::number(sample->pwm));
+    }
 }
 
 void MainWindow::onStopButtonClicked()

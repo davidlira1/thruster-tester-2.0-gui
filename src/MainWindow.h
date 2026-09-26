@@ -2,6 +2,7 @@
 
 #include "SerialService.h"
 
+#include <QByteArray>
 #include <QMainWindow>
 #include <QTimer>
 #include <QVector>
@@ -38,6 +39,7 @@ private:
     void onConnectButtonClicked();
     void onStartButtonClicked();
     void onStopButtonClicked();
+    void onSerialDataReceived(const QByteArray &payload);
     void onSerialError(const QString &message);
     void hideErrorToast();
     void positionErrorToast();
@@ -46,5 +48,6 @@ private:
     QButtonGroup *tabButtonGroup;
     SerialService *serialService;
     QTimer *portRefreshTimer;
+    QByteArray m_rxBuffer;
     bool m_testRunning = false;
 };
